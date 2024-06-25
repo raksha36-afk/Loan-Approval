@@ -1,10 +1,20 @@
 import spacy
 
-# Load spaCy English model
-nlp = spacy.load('en_core_web_sm')
+# Example LIME weights (replace with your actual LIME weights)
+lime_weights = {
+    'income': 0.6,
+    'age': -0.3,
+    'credit_score': 0.4,
+    'employment_status': 0.2,
+    'loan_amount': 0.5
+}
 
-# Function to generate explanation with enhanced text processing
-def generate_explanation_enhanced(weights):
+# Explanation templates
+approval_template = "Congratulations! Your loan has been approved because of your {features}."
+rejection_template = "We regret to inform you that your loan application was rejected due to your {features}."
+
+# Function to generate explanation based on weights
+def generate_explanation(weights):
     reasons = []
     for feature, weight in weights.items():
         if weight > 0:
@@ -19,12 +29,16 @@ def generate_explanation_enhanced(weights):
     else:
         explanation = rejection_template.format(features=features_text)
     
-    # Perform enhanced text processing (e.g., using spaCy)
-    doc = nlp(explanation)
-    processed_text = " ".join([token.lemma_ for token in doc])
-    
-    return processed_text
+    return explanation
 
-# Generate and print enhanced explanation
-enhanced_explanation = generate_explanation_enhanced(lime_weights)
-print(enhanced_explanation)
+# Generate and print explanation
+explanation = generate_explanation(lime_weights)
+print(explanation)
+
+# Optionally, use SpaCy for more advanced text processing tasks
+nlp = spacy.load('en_core_web_sm')
+doc = nlp(explanation)
+
+# Access SpaCy's linguistic annotations
+for token in doc:
+    print(token.text, token.lemma_, token.pos_, token.dep_)
