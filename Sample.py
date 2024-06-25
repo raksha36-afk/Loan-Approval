@@ -1,3 +1,19 @@
+# Extract feature names and weights for plotting
+features = [feature.split(' ')[0] for feature, weight in explanation_list]
+weights = [weight for feature, weight in explanation_list]
+
+# Plotting the bar plot
+plt.figure(figsize=(10, 6))
+bars = plt.barh(features, weights, color='skyblue')
+plt.xlabel('Impact on Prediction')
+plt.title('Impact of Top Features on Model Prediction for Sample 10')
+
+# Adding data labels
+for bar in bars:
+    plt.text(bar.get_width(), bar.get_y() + bar.get_height()/2, f'{bar.get_width():.2f}', ha='left', va='center')
+
+plt.show()
+
 import spacy
 
 # Example LIME weights (replace with your actual LIME weights)
