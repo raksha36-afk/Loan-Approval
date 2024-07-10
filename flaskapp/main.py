@@ -52,5 +52,29 @@ def predict():
 
     return render_template('result.html', rf_status=rf_status, xgb_status=xgb_status)
 
+def generate_dummy_data(num_rows):
+    data = []
+    for i in range(1, num_rows + 1):
+        data.append({
+            'model_no': f'Model {i}',
+            'no_of_dependents': i * 2,
+            'false_p': i * 3,
+            'false_n': i * 4,
+            'true_p': i * 5,
+            'true_n': i * 6,
+            'income_annum': i * 10000,
+            'asset_value': i * 50000
+        })
+    return data
+
+# Route to render the template with dummy data
+@app.route('/model_display')
+def index():
+    num_rows = 50  # Number of rows to generate
+    versions = generate_dummy_data(num_rows)
+    return render_template('model_statistics.html', versions=versions)
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)

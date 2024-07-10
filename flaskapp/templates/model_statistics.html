@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Statistics</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Prevent body scroll */
+            font-family: Arial, sans-serif;
+        }
+        .navbar, .footer {
+            height: 50px;
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid #ddd;
+        }
+        .footer {
+            border-top: 1px solid #ddd;
+        }
+        .outer-container {
+            display: flex;
+            height: calc(100vh - 100px); /* Account for navbar and footer */
+        }
+        .left-section {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            box-sizing: border-box;
+            border-right: 1px solid #ddd;
+        }
+        .right-section {
+            flex: 1;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: auto auto;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .grid-item {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+            background-color: #f9f9f9;
+        }
+        .chart-section, .details-section {
+            margin-bottom: 20px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="navbar">
+        Navigation Bar
+    </div>
+    <div class="outer-container">
+        <div class="left-section">
+            <h2>Model Statistics</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Model No</th>
+                        <th>No of Dependents</th>
+                        <th>False Positives</th>
+                        <th>False Negatives</th>
+                        <th>True Positives</th>
+                        <th>True Negatives</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for version in versions %}
+                    <tr>
+                        <td>{{ version.model_no }}</td>
+                        <td>{{ version.no_of_dependents }}</td>
+                        <td>{{ version.false_p }}</td>
+                        <td>{{ version.false_n }}</td>
+                        <td>{{ version.true_p }}</td>
+                        <td>{{ version.true_n }}</td>
+                        <td><a href="#" onclick="updateChartAndMatrix({{ loop.index0 }})">View Chart & Matrix</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="right-section">
+            <div class="chart-section">
+                <h2>Chart for Selected Model</h2>
+                <canvas id="barChart"></canvas>
+            </div>
+            <div class="details-section">
+                <h2>Confusion Matrix for Selected Model</h2>
+                <div class="grid-container">
+                    <div class="grid-item" id="false_p">False Positives: </div>
+                    <div class="grid-item" id="false_n">False Negatives: </div>
+                    <div class="grid-item" id="true_p">True Positives: </div>
+                    <div class="grid-item" id="true_n">True Negatives: </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        Footer
+    </div>
+
+    <script>
+        var versions = {{ versions | tojson }};
+        var chartInstance = null;
+
+        function updateChartAndMatrix(index) {
+            var version = versions[index];
+
+            if (chartInstance) {
+                chartInstance.data.datasets[0].data = [
+                    version.no_of_dependents,
+                    version.income_annum,
+                    version.asset_value
+                ];
+                chartInstance.update();
+            } else {
+                var ctx = document.getElementById('barChart').getContext('2d');
+                chartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['No of Dependents', 'Income Annum', 'Asset Value'],
+                        datasets: [{
+                            label: 'Model Data',
+                            data: [
+                                version.no_of_dependents,
+                                version.income_annum,
+                                version.asset_value
+                            ],
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.2)',
+                                'rgba(54, 162, 235, 0.2)',
+                                'rgba(75, 192, 192, 0.2)'
+                            ],
+                            borderColor: [
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(75, 192, 192, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+            document.getElementById("false_p").textContent = "False Positives: " + version.false_p;
+            document.getElementById("false_n").textContent = "False Negatives: " + version.false_n;
+            document.getElementById("true_p").textContent = "True Positives: " + version.true_p;
+            document.getElementById("true_n").textContent = "True Negatives: " + version.true_n;
+        }
+
+        updateChartAndMatrix(0);
+    </script>
+</body>
+</html>
